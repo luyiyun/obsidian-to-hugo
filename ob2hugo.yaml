@@ -1,2 +1,14 @@
-obsidian_vault_dir: "C:\\Users\\admin\\Documents\\obsidian"
-hugo_content_dir: "C:\\Users\\admin\\hugo-blog\\content"
+obsidian_vault_dir: "C:\\Users\\admin\\OneDrive\\obsidian"
+hugo_content_dir: "C:\\Users\\admin\\hugo-blog\\content\\posts"
+clean_hugo_content: true
+author:
+  name: "rongzhiwei"
+  email: "18845728185@163.com"
+  link: "https://rongzhiwei.github.io/"
+  avatar: ""
+draft: false
+include_files:
+  - "生活/*.md"
+#  - "贝叶斯Logistic回归.md"
+exclude_files:
+  - "日记/*.md"

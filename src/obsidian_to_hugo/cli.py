@@ -5,6 +5,7 @@ Obsidian to Hugo CLI
 import argparse
 import os
 import yaml
+import logging
 from .obsidian_to_hugo import ObsidianToHugo
 
 
@@ -32,21 +33,50 @@ def main() -> None:
         "--config_file",
         help="Path to the config file, default is ./ob2hugo.yaml",
         type=str,
-        default="./ob2hugo.yaml",
+        default=None,
+    )
+    parser.add_argument(
+        "--log_level",
+        help="Log level, default is INFO",
+        type=str,
+        default="INFO",
     )
     args = parser.parse_args()
 
+    logging.basicConfig(
+        level=getattr(logging, args.log_level.upper(), logging.INFO),
+        format="[%(asctime)s][%(levelname)s]: %(message)s",
+    )
+
+    if args.config_file is None:
+        args.config_file = "./ob2hugo.yaml"
     if not os.path.isfile(args.config_file):
         raise FileNotFoundError(f"The config file {args.config_file} does not exist.")
-    with open(args.config_file, "r") as f:
+    with open(args.config_file, "r", encoding="utf-8") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-    # if not args.hugo_content_dir or not os.path.isdir(args.hugo_content_dir):
-    #     parser.error("The hugo content directory does not exist.")
-    # if not args.obsidian_vault_dir or not os.path.isdir(args.obsidian_vault_dir):
-    #     parser.error("The obsidian vault directory does not exist.")
+    print(config)
+
+    if ("obsidian_vault_dir" not in config) or (
+        not os.path.isdir(config["obsidian_vault_dir"])
+    ):
+        parser.error("The obsidian vault directory does not exist.")
+    if ("hugo_content_dir" not in config) or (
+        not os.path.isdir(config["hugo_content_dir"])
+    ):
+        parser.error("The hugo content directory does not exist.")
+
+    author = config.get("author", {})
     obsidian_to_hugo = ObsidianToHugo(
         obsidian_vault_dir=config["obsidian_vault_dir"],
         hugo_content_dir=config["hugo_content_dir"],
+        include_files=config.get("include_files", None),
+        exclude_files=config.get("exclude_files", None),
+        author_name=author.get("name", ""),
+        author_link=author.get("link", ""),
+        author_email=author.get("email", ""),
+        author_avatar=author.get("avatar", ""),
+        draft=config.get("draft", False),
+        clean_hugo_content=config.get("clean_hugo_content", False),
     )
     obsidian_to_hugo.run()
 
