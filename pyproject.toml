@@ -20,6 +20,10 @@ classifiers = [
   "Topic :: Text Processing :: Markup",
 ]
 
+[project.scripts]
+ob2hugo = "obsidian_to_hugo.cli:main"
+
 [project.urls]
 "Source" = "https://github.com/devidw/obsidian-to-hugo"
 "Bug Tracker" = "https://github.com/devidw/obsidian-to-hugo/issues"
+
