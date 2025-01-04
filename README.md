@@ -3,10 +3,10 @@
 - [x] 全新的命令行工具`ob2hugo`来实现将Obsidian markdown 转换到 Hugo markdown， 并将文件放在指定的目录下，目前仅支持Fixit主题。
 - [x] 通过配置文件来控制ob2hugo的行为
 - [x] 可以使用`include_files`和`exclude_files`来控制哪些文件被转换，哪些文件不被转换。
-- [ ] 通过读取obsdian md文件front yaml中的publis来控制哪些文章被转换
+- [x] 通过读取obsdian md文件front yaml中的publis来控制哪些文章被转换
 - [x] 使用`author`来控制文章的作者，而不是使用Front Matter中的author。
 - [x] 可以控制是否生成目录时清空原来的hugo content和assets目录
-- [x] 如果文章没有设置draft的话，则为其设置默认值，这个默认值可以在配置文件中设置。
+- [x] ~~如果文章没有设置draft的话，则为其设置默认值，这个默认值可以在配置文件中设置。~~
 - [x] 支持转换yaml front matter 
 - [x] 支持转换math equation block
 - [ ] 支持转换inline math equation
@@ -16,4 +16,5 @@
 - [ ] 支持转换obsidian的双链引用
 - [ ] 支持转换equation, theorem, callout block的引用
 - [ ] 支持dataview的转换
+- [ ] 在hugo目录中保持ob中的目录结构
 

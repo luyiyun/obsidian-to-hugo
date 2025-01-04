@@ -7,11 +7,15 @@ import os.path as osp
 import logging
 from pathlib import Path
 from dataclasses import dataclass
-from .processers.front_matter_processor import FrontMatterProcessor
-from .processers.math_formula_processor import MathFormulaProcessor
-from .processers.image_link_processor import ImageLinkProcessor
-from .processers.remove_excalidraw_anno_processor import ExcalidrawAnnotationProcessor
 from shutil import rmtree
+
+from .processers import (
+    FrontMatterProcessor,
+    MathFormulaProcessor,
+    ImageLinkProcessor,
+    ExcalidrawAnnotationProcessor,
+    PublishFilter,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -32,7 +36,7 @@ class ObsidianToHugo:
     author_link: str = ""
     author_email: str = ""
     author_avatar: str = ""
-    default_draft: bool = False
+    # default_draft: bool = False
     clean_hugo_content: bool = False
     obsidian_asset_dir: str = "附件"
 
@@ -42,12 +46,14 @@ class ObsidianToHugo:
         self.hugo_content_dir = self.hugo_root / "content/posts"
         self.hugo_asset_dir = self.hugo_root / "assets"
 
+        self._publish_filter = PublishFilter()
+
         self._front_matter_processor = FrontMatterProcessor(
             author_name=self.author_name,
             author_link=self.author_link,
             author_email=self.author_email,
             author_avatar=self.author_avatar,
-            draft=self.default_draft,
+            draft=False,  # NOTE: 默认全部都不是草稿
         )
         self._math_formula_processor = MathFormulaProcessor()
         self._image_link_processor = ImageLinkProcessor(
@@ -75,6 +81,12 @@ class ObsidianToHugo:
             with open(fn, "r", encoding="utf-8") as f:
                 content = f.read()
 
+            # 查看front matter来决定是否发布
+            logger.info(f"Check if {relat_fn} is published.")
+            if not self._publish_filter(fn, content):
+                logger.info(f"{relat_fn} is not published, skip it.")
+                continue
+
             # 处理front matter
             logger.info(f"Process front matter of {relat_fn}.")
             content = self._front_matter_processor(fn, content)
@@ -96,23 +108,6 @@ class ObsidianToHugo:
             os.makedirs(target_fn.parent, exist_ok=True)
             with open(target_fn, "w", encoding="utf-8") as f:
                 f.write(content)
-            # If the file matches any of the filters, delete it.
-            # keep_file = True
-            # for filter in self.filters:
-            #     if not filter(content, file):
-            #         os.remove(os.path.join(root, file))
-            #         keep_file = False
-            #         break
-            # if not keep_file:
-            #     continue
-            # for processor in self.processors:
-            #     content = processor(content)
-            # with open(os.path.join(root, file), "w", encoding="utf-8") as f:
-            #     f.write(content)
-
-        # self.clear_hugo_content_dir()
-        # self.copy_obsidian_vault_to_hugo_content_dir()
-        # self.process_content()
 
     def get_publish_md(self) -> list[Path]:
         res = []

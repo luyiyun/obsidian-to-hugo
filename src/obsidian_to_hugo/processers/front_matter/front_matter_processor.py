@@ -1,31 +1,23 @@
-import re
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
 from datetime import datetime
 
 import yaml
 
+from .base import FrontMatterBase
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
-class FrontMatterProcessor:
-    fm_type: Literal["yaml", "toml", "json"] = "yaml"
+class FrontMatterProcessor(FrontMatterBase):
     replace: tuple[str, str] = (("created", "date"), ("updated", "lastmod"))
     author_name: str = ""
     author_link: str = ""
     author_email: str = ""
     author_avatar: str = ""
     draft: bool = False
-
-    def __post_init__(self):
-        if self.fm_type != "yaml":
-            raise ValueError(f"Unsupported format {self.fm_type}.")
-        # re.DAOTALL令.可以匹配到换行符
-        self.regex = re.compile(r"---\n(.*?)\n---\n", re.DOTALL)
 
     def __call__(self, fn: Path, content: str) -> str:
         match = self.regex.search(content)

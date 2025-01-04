@@ -73,7 +73,7 @@ def main() -> None:
         author_link=author.get("link", ""),
         author_email=author.get("email", ""),
         author_avatar=author.get("avatar", ""),
-        default_draft=config.get("default_draft", True),
+        # default_draft=config.get("default_draft", True),
         clean_hugo_content=config.get("clean_hugo_content", False),
         obsidian_asset_dir=config.get("obsidian_asset", "附件"),
     )
