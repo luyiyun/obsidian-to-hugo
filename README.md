@@ -23,5 +23,8 @@
 - [x] 在hugo目录中保持ob中的目录结构
 - [ ] 在front matter中加入categories和collection分类法
 - [ ] 将所有的callout转变成fixit的Admonition shortcode，这样便于去和其他格式转换解耦
-- [ ] 使用[kroki](https://kroki.io/)支持Excalidraw
+- [x] 使用[kroki](https://kroki.io/)支持Excalidraw
 
+## 支持Obsidian中嵌入的Excalidraw
+
+需要安装[kroki](https://kroki.io/)，详细安装方式请见[kroki installation](https://kroki.hugomods.com/docs/installation/)。

@@ -5,8 +5,6 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-from .utils import split_content_by_regex
-
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +13,7 @@ logger = logging.getLogger(__name__)
 class ImageLinkProcessor:
     ob_asset_dir: Path | str
     hugo_asset_dir: Path | str
+    img_exts: tuple[str] = (".png", ".jpeg", ".gif", ".svg", ".jpg")
 
     def __post_init__(self):
         if isinstance(self.ob_asset_dir, str):
@@ -29,7 +28,9 @@ class ImageLinkProcessor:
             return content
 
         # 将content分成两部分，第一部分是其他内容，第二部分是图片链接
-        others, img_links = split_content_by_regex(self.regex, content, True)
+        parts = self.regex.split(content)
+        others = parts[::2]
+        img_links = parts[1::2]
         logger.info(f"Found {len(img_links)} obsidian-style image links in {fn}.")
 
         # 处理图片链接
@@ -48,6 +49,17 @@ class ImageLinkProcessor:
 
             else:
                 img_item["src"] = linki
+
+            # 找到图片的扩展名，并判断是否支持
+            for ext in self.img_exts:
+                if img_item["src"].endswith(ext):
+                    break
+            else:
+                logger.warning(
+                    f"Image {img_item["src"]} of {fn} has an unsupported extension."
+                )
+                new_links.append(f"![[{linki}]]")  # 原样输出
+                continue
 
             # 找到图片的绝对路径，并复制到hugo的静态资源目录
             img_full_path = list(self.ob_asset_dir.rglob(img_item["src"]))

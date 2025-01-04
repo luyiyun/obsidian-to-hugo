@@ -16,6 +16,7 @@ from .processers import (
     PublishFilter,
     BlockMathEquationProcessor,
     InlineMathEquationProcessor,
+    ExcalidrawProcessor,
 )
 
 
@@ -62,6 +63,10 @@ class ObsidianToHugo:
             ob_asset_dir=self.ob_root / self.obsidian_asset_dir,
             hugo_asset_dir=self.hugo_asset_dir,
         )
+        self._excalidraw_processor = ExcalidrawProcessor(
+            ob_asset_dir=self.ob_root / self.obsidian_asset_dir,
+            hugo_asset_dir=self.hugo_asset_dir,
+        )
         self._excalidraw_anno_processor = ExcalidrawAnnotationProcessor()
 
     def run(self) -> None:
@@ -97,6 +102,10 @@ class ObsidianToHugo:
             logger.info(f"Process math formulas of {relat_fn}.")
             content = self._math_block_processor(fn, content)
             content = self._math_inline_processor(fn, content)
+
+            # 处理excalidraw
+            logger.info(f"Process excalidraw of {relat_fn}.")
+            content = self._excalidraw_processor(fn, content)
 
             # 处理图片链接
             logger.info(f"Process image links of {relat_fn}.")
