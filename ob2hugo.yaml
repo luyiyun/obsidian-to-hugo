@@ -6,7 +6,7 @@ author:
   email: "18845728185@163.com"
   link: "https://rongzhiwei.github.io/"
   avatar: ""
-draft: false
+default_draft: true  # 如果文章没有设置draft的话，自动设置为true
 include_files:
   - "生活/*.md"
 #  - "贝叶斯Logistic回归.md"

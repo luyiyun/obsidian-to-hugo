@@ -31,7 +31,7 @@ class ObsidianToHugo:
     author_link: str = ""
     author_email: str = ""
     author_avatar: str = ""
-    draft: bool = False
+    default_draft: bool = False
     clean_hugo_content: bool = False
 
     def __post_init__(self):
@@ -43,7 +43,7 @@ class ObsidianToHugo:
             author_link=self.author_link,
             author_email=self.author_email,
             author_avatar=self.author_avatar,
-            draft=self.draft,
+            draft=self.default_draft,
         )
         self._math_formula_processor = MathFormulaProcessor()
 

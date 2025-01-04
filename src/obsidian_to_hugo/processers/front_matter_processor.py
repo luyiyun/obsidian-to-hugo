@@ -51,6 +51,7 @@ class FrontMatterProcessor:
         # 自动添加draft标记
         if "draft" not in fm_dict:
             fm_dict["draft"] = self.draft
+        logger.info(f"The draft flag of {fn} is {fm_dict['draft']}.")
         # 自动添加KATex渲染
         fm_dict["math"] = True
 

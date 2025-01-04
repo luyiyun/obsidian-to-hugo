@@ -45,7 +45,7 @@ def main() -> None:
 
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper(), logging.INFO),
-        format="[%(asctime)s][%(levelname)s]: %(message)s",
+        format="[%(asctime)s][%(name)s][%(levelname)s]: %(message)s",
     )
 
     if args.config_file is None:
@@ -75,7 +75,7 @@ def main() -> None:
         author_link=author.get("link", ""),
         author_email=author.get("email", ""),
         author_avatar=author.get("avatar", ""),
-        draft=config.get("draft", False),
+        default_draft=config.get("default_draft", True),
         clean_hugo_content=config.get("clean_hugo_content", False),
     )
     obsidian_to_hugo.run()
