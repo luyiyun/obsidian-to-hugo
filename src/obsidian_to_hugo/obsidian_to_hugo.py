@@ -11,10 +11,11 @@ from shutil import rmtree
 
 from .processers import (
     FrontMatterProcessor,
-    MathFormulaProcessor,
     ImageLinkProcessor,
     ExcalidrawAnnotationProcessor,
     PublishFilter,
+    BlockMathEquationProcessor,
+    InlineMathEquationProcessor,
 )
 
 
@@ -55,7 +56,8 @@ class ObsidianToHugo:
             author_avatar=self.author_avatar,
             draft=False,  # NOTE: 默认全部都不是草稿
         )
-        self._math_formula_processor = MathFormulaProcessor()
+        self._math_block_processor = BlockMathEquationProcessor()
+        self._math_inline_processor = InlineMathEquationProcessor()
         self._image_link_processor = ImageLinkProcessor(
             ob_asset_dir=self.ob_root / self.obsidian_asset_dir,
             hugo_asset_dir=self.hugo_asset_dir,
@@ -93,7 +95,8 @@ class ObsidianToHugo:
 
             # 处理公式
             logger.info(f"Process math formulas of {relat_fn}.")
-            content = self._math_formula_processor(fn, content)
+            content = self._math_block_processor(fn, content)
+            content = self._math_inline_processor(fn, content)
 
             # 处理图片链接
             logger.info(f"Process image links of {relat_fn}.")

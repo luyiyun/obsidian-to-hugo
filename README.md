@@ -1,4 +1,8 @@
-# TODO List
+支持的Hugo主题
+- [Fixit](https://fixit.lruihao.cn/zh-cn/)
+
+
+## TODO List
 
 - [x] 全新的命令行工具`ob2hugo`来实现将Obsidian markdown 转换到 Hugo markdown， 并将文件放在指定的目录下，目前仅支持Fixit主题。
 - [x] 通过配置文件来控制ob2hugo的行为
@@ -9,12 +13,15 @@
 - [x] ~~如果文章没有设置draft的话，则为其设置默认值，这个默认值可以在配置文件中设置。~~
 - [x] 支持转换yaml front matter 
 - [x] 支持转换math equation block
-- [ ] 支持转换inline math equation
+- [x] 支持转换inline math equation
 - [x] 支持转换图片链接，并将对应图片转移到hugo assets目录下
 - [x] 支持移除Excalidraw所产生的注释（该注释时用于链接原始Excalidraw文件，用来进行编辑的）
 - [ ] 支持转换math theorem callout block
 - [ ] 支持转换obsidian的双链引用
 - [ ] 支持转换equation, theorem, callout block的引用
 - [ ] 支持dataview的转换
-- [ ] 在hugo目录中保持ob中的目录结构
+- [x] 在hugo目录中保持ob中的目录结构
+- [ ] 在front matter中加入categories和collection分类法
+- [ ] 将所有的callout转变成fixit的Admonition shortcode，这样便于去和其他格式转换解耦
+- [ ] 使用[kroki](https://kroki.io/)支持Excalidraw
 

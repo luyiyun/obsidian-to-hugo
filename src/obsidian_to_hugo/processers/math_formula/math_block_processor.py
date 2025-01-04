@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class MathFormulaProcessor:
+class BlockMathEquationProcessor:
     def __post_init__(self):
         # re.DAOTALL令.可以匹配到换行符
         self.block_reg = re.compile(r"\$\$.*?\$\$.*?\n", re.DOTALL)
