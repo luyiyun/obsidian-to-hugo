@@ -1,6 +1,7 @@
 obsidian_vault_dir: "C:\\Users\\admin\\OneDrive\\obsidian"
-hugo_content_dir: "C:\\Users\\admin\\hugo-blog\\content\\posts"
-clean_hugo_content: true
+hugo_root_dir: "C:\\Users\\admin\\hugo-blog"
+obsidian_asset: "附件"
+clean_hugo_content: false
 author:
   name: "rongzhiwei"
   email: "18845728185@163.com"
@@ -9,6 +10,7 @@ author:
 default_draft: true  # 如果文章没有设置draft的话，自动设置为true
 include_files:
   - "生活/*.md"
+  - "狄里克雷过程.md"
 #  - "贝叶斯Logistic回归.md"
 exclude_files:
   - "日记/*.md"

@@ -45,7 +45,7 @@ class CLITestCase(unittest.TestCase):
 
         obsidian_to_hugo = ObsidianToHugo(
             obsidian_vault_dir="./tests/temp/obsidian",
-            hugo_content_dir="./tests/temp/hugo",
+            hugo_root_dir="./tests/temp/hugo",
             filters=[custom_filter],
         )
 
@@ -70,7 +70,7 @@ class CLITestCase(unittest.TestCase):
 
         obsidian_to_hugo = ObsidianToHugo(
             obsidian_vault_dir="./tests/temp/obsidian",
-            hugo_content_dir="./tests/temp/hugo",
+            hugo_root_dir="./tests/temp/hugo",
             processors=[custom_processor],
         )
 

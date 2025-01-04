@@ -2,10 +2,6 @@ import re
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
-from datetime import datetime
-
-import yaml
 
 
 logger = logging.getLogger(__name__)
@@ -25,8 +21,7 @@ class MathFormulaProcessor:
 
         blocks = self.block_reg.findall(content)
         others = self.block_reg.split(content)
-        print(len(blocks))
-        print(len(others))
+        logger.info(f"{len(blocks)} math formula blocks found in {fn}.")
         content = ""
         for block, other in zip(blocks, others):
             # fixit对于公式，需要加上{{< raw >}}{{< /raw >}}
@@ -39,4 +34,5 @@ class MathFormulaProcessor:
                 content += "\n{{< raw >}}\n"
                 content += block
                 content += "{{< /raw >}}\n"
+        content += others[-1]  # others比分隔符多一个，需要加上
         return content

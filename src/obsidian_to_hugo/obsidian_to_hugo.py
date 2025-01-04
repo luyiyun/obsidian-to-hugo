@@ -3,14 +3,14 @@ Utilities to process obsidian notes and convert them to hugo ready content files
 """
 
 import os
+import os.path as osp
 import logging
 from pathlib import Path
 from dataclasses import dataclass
 from .processers.front_matter_processor import FrontMatterProcessor
-from .processers.math_formula_processer import MathFormulaProcessor
-from shutil import rmtree  # , copytree, ignore_patterns
-# from .wiki_links_processor import replace_wiki_links
-# from .md_mark_processor import replace_md_marks
+from .processers.math_formula_processor import MathFormulaProcessor
+from .processers.image_link_processor import ImageLinkProcessor
+from shutil import rmtree
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class ObsidianToHugo:
     """
 
     obsidian_vault_dir: str
-    hugo_content_dir: str
+    hugo_root_dir: str
     processors: list = None
     include_files: list[str] | None = None
     exclude_files: list[str] | None = None
@@ -33,10 +33,13 @@ class ObsidianToHugo:
     author_avatar: str = ""
     default_draft: bool = False
     clean_hugo_content: bool = False
+    obsidian_asset_dir: str = "附件"
 
     def __post_init__(self):
         self.ob_root = Path(self.obsidian_vault_dir)
-        self.hugo_root = Path(self.hugo_content_dir)
+        self.hugo_root = Path(self.hugo_root_dir)
+        self.hugo_content_dir = self.hugo_root / "content/posts"
+        self.hugo_asset_dir = self.hugo_root / "assets"
 
         self._front_matter_processor = FrontMatterProcessor(
             author_name=self.author_name,
@@ -46,6 +49,10 @@ class ObsidianToHugo:
             draft=self.default_draft,
         )
         self._math_formula_processor = MathFormulaProcessor()
+        self._image_link_processor = ImageLinkProcessor(
+            ob_asset_dir=self.ob_root / self.obsidian_asset_dir,
+            hugo_asset_dir=self.hugo_asset_dir,
+        )
 
     def run(self) -> None:
         """
@@ -54,8 +61,7 @@ class ObsidianToHugo:
         are replaced with the hugo links.
         """
         if self.clean_hugo_content:
-            logger.info(f"Clean the hugo content directory: {self.hugo_content_dir}.")
-            self.clear_hugo_content_dir()
+            self.clear_hugo_dir()
 
         md_files = self.get_publish_md()
         logger.info(f"Found {len(md_files)} markdown files to process.")
@@ -63,7 +69,7 @@ class ObsidianToHugo:
         for fn in md_files:
             relat_fn = fn.relative_to(self.ob_root)
             logger.info(f"Start to process {relat_fn}.")
-            target_fn = self.hugo_root / relat_fn
+            target_fn = self.hugo_content_dir / relat_fn
             with open(fn, "r", encoding="utf-8") as f:
                 content = f.read()
 
@@ -74,6 +80,10 @@ class ObsidianToHugo:
             # 处理公式
             logger.info(f"Process math formulas of {relat_fn}.")
             content = self._math_formula_processor(fn, content)
+
+            # 处理图片链接
+            logger.info(f"Process image links of {relat_fn}.")
+            content = self._image_link_processor(fn, content)
 
             # 保存文件内容
             logger.info(f"Save {target_fn}.")
@@ -112,12 +122,17 @@ class ObsidianToHugo:
 
         return res
 
-    def clear_hugo_content_dir(self) -> None:
+    def clear_hugo_dir(self) -> None:
         """
         Delete the whole content directory.
         NOTE: The folder itself gets deleted and recreated.
         """
-        rmtree(self.hugo_content_dir)
+        if osp.exists(self.hugo_content_dir):
+            logger.info(f"Clean the hugo content directory: {self.hugo_content_dir}.")
+            rmtree(self.hugo_content_dir)
+        if osp.exists(self.hugo_asset_dir):
+            logger.info(f"Clean the hugo asset directory: {self.hugo_asset_dir}.")
+            rmtree(self.hugo_asset_dir)
 
     #
     # def copy_obsidian_vault_to_hugo_content_dir(self) -> None:

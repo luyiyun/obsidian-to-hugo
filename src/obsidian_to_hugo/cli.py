@@ -45,7 +45,7 @@ def main() -> None:
 
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper(), logging.INFO),
-        format="[%(asctime)s][%(name)s][%(levelname)s]: %(message)s",
+        format="[%(levelname)s][%(asctime)s][%(name)s]: %(message)s",
     )
 
     if args.config_file is None:
@@ -60,15 +60,13 @@ def main() -> None:
         not os.path.isdir(config["obsidian_vault_dir"])
     ):
         parser.error("The obsidian vault directory does not exist.")
-    if ("hugo_content_dir" not in config) or (
-        not os.path.isdir(config["hugo_content_dir"])
-    ):
-        parser.error("The hugo content directory does not exist.")
+    if ("hugo_root_dir" not in config) or (not os.path.isdir(config["hugo_root_dir"])):
+        parser.error("The hugo root directory does not exist.")
 
     author = config.get("author", {})
     obsidian_to_hugo = ObsidianToHugo(
         obsidian_vault_dir=config["obsidian_vault_dir"],
-        hugo_content_dir=config["hugo_content_dir"],
+        hugo_root_dir=config["hugo_root_dir"],
         include_files=config.get("include_files", None),
         exclude_files=config.get("exclude_files", None),
         author_name=author.get("name", ""),
@@ -77,6 +75,7 @@ def main() -> None:
         author_avatar=author.get("avatar", ""),
         default_draft=config.get("default_draft", True),
         clean_hugo_content=config.get("clean_hugo_content", False),
+        obsidian_asset_dir=config.get("obsidian_asset", "附件"),
     )
     obsidian_to_hugo.run()
 
