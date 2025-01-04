@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from .processers.front_matter_processor import FrontMatterProcessor
 from .processers.math_formula_processor import MathFormulaProcessor
 from .processers.image_link_processor import ImageLinkProcessor
+from .processers.remove_excalidraw_anno_processor import ExcalidrawAnnotationProcessor
 from shutil import rmtree
 
 
@@ -53,6 +54,7 @@ class ObsidianToHugo:
             ob_asset_dir=self.ob_root / self.obsidian_asset_dir,
             hugo_asset_dir=self.hugo_asset_dir,
         )
+        self._excalidraw_anno_processor = ExcalidrawAnnotationProcessor()
 
     def run(self) -> None:
         """
@@ -84,6 +86,10 @@ class ObsidianToHugo:
             # 处理图片链接
             logger.info(f"Process image links of {relat_fn}.")
             content = self._image_link_processor(fn, content)
+
+            # 取消内容中出现的excadraw注解
+            logger.info(f"Remove excalidraw annotations of {relat_fn}.")
+            content = self._excalidraw_anno_processor(fn, content)
 
             # 保存文件内容
             logger.info(f"Save {target_fn}.")
