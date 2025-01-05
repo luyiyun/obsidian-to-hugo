@@ -17,6 +17,7 @@ from .processers import (
     BlockMathEquationProcessor,
     InlineMathEquationProcessor,
     ExcalidrawProcessor,
+    WikiLinkProcessor,
 )
 
 
@@ -67,6 +68,10 @@ class ObsidianToHugo:
             ob_asset_dir=self.ob_root / self.obsidian_asset_dir,
             hugo_asset_dir=self.hugo_asset_dir,
         )
+        self._wiki_links_processor = WikiLinkProcessor(
+            ob_asset_dir=self.ob_root / self.obsidian_asset_dir,
+            hugo_asset_dir=self.hugo_asset_dir,
+        )
         self._excalidraw_anno_processor = ExcalidrawAnnotationProcessor()
 
     def run(self) -> None:
@@ -81,6 +86,7 @@ class ObsidianToHugo:
         md_files = self.get_publish_md()
         logger.info(f"Found {len(md_files)} markdown files to process.")
 
+        pulished_files = []
         for fn in md_files:
             relat_fn = fn.relative_to(self.ob_root)
             logger.info(f"Start to process {relat_fn}.")
@@ -97,6 +103,10 @@ class ObsidianToHugo:
             # 处理front matter
             logger.info(f"Process front matter of {relat_fn}.")
             content = self._front_matter_processor(fn, content)
+
+            # 处理wiki links
+            logger.info(f"Process wiki links of {relat_fn}.")
+            content = self._wiki_links_processor(fn, content)
 
             # 处理公式
             logger.info(f"Process math formulas of {relat_fn}.")
@@ -120,6 +130,12 @@ class ObsidianToHugo:
             os.makedirs(target_fn.parent, exist_ok=True)
             with open(target_fn, "w", encoding="utf-8") as f:
                 f.write(content)
+
+            pulished_files.append(relat_fn)
+
+        logger.info(f"Pulished {len(pulished_files)} files.")
+        for fn in pulished_files:
+            logger.info(f"  {fn}")
 
     def get_publish_md(self) -> list[Path]:
         res = []
