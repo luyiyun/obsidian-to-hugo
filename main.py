@@ -2,6 +2,7 @@ from ipaddress import collapse_addresses
 import re
 from typing import Iterable, Self, Any, Union
 from dataclasses import dataclass
+from collections import OrderedDict
 import mistune
 
 import yaml
@@ -78,6 +79,8 @@ class SectionParser:
         # 启用多行模式另一种用法是使用flag re.M，此时整个pattern中的所有^$
         # 都表示每一行的开始和结束，而不是整个文本的开始和结束
         # 这里，我们匹配的对象可能直接到达文本末尾，因此需要使用$来匹配
+
+        # 我们还要避免会匹配到注释
         self.pattern = re.compile(
             r"((?m:^)\s*?"
             + ("#" * level)
@@ -87,20 +90,49 @@ class SectionParser:
             + ("#" * level)
             + r" |$)",
         )
+        self.code_pattern = re.compile(r"```.+?```", re.DOTALL)
 
     def __call__(self, text: str) -> tuple[str | None, ASTnode | None, str | None]:
         text = preprocess(text)
-        match = self.pattern.search(text)
+
+        # # 判断match的内容中是否存在```，并记录其出现的次数
+        # # 如果次数不是偶数，则说明存在未闭合的```，需要将其删除。
+        # # 我们所匹配的下界可能并不是一个标题，而是一个注释，我们需要重新寻找
+        # # 下面的内容，直至找到>1的奇数个```后，才表示正确的内容
+
+        # 找到所有的code block，并将其内容替换为一个占位符
+        parts = self.code_pattern.split(text)
+        if len(parts) > 1:
+            others = parts[::2]
+            codes = parts[1::2]
+            codes = {f"([<@#$code_id {hash(code)}&*%)]>": code for code in codes}
+
+            text_clean = ""
+            for other, code in zip(others, codes.keys()):
+                text_clean += other + code
+            text_clean += parts[-1]
+        else:
+            text_clean = text
+
+        match = self.pattern.search(text_clean)
         if not match:
             return None, None, text
 
-        forward = text[: match.start()] if match.start() > 0 else None
-        backward = text[match.end(1) :] if match.end(1) < len(text) else None
-        raw = match.group(1)
+        forward = text_clean[: match.start()] if match.start() > 0 else None
+        backward = (
+            text_clean[match.end(1) :] if match.end(1) < len(text_clean) else None
+        )
+        raw = match.group(1).strip()
 
         # 将标题提取出来，只将后面的内容放到raw中，不然会陷入死循环
         title_match = re.search(r"^#+\s*(.*?)\s*\n", raw)
         raw = raw[title_match.end(1) :]
+
+        if len(parts) > 1:
+            for code_id, code in codes.items():
+                forward = forward.replace(code_id, code)
+                backward = backward.replace(code_id, code)
+                raw = raw.replace(code_id, code)
 
         return (
             forward,
@@ -108,7 +140,7 @@ class SectionParser:
                 f"Section{self.level}",
                 pattern=self.pattern,
                 raw=raw,
-                data={"title": title_match.group(1)},
+                data={"title": title_match.group(1).strip()},
             ),
             backward,
         )
@@ -306,17 +338,22 @@ def print_ast(ast: list[dict[str, Any]], indent: int = 0):
 
 
 def main():
-    example_markdown = "C:/Users/admin/OneDrive/obsidian/专题学习/狄里克雷混合模型.md"
-    with open(example_markdown, "r", encoding="utf-8") as f:
-        content = f.read()
+    example_markdowns = [
+        # "C:/Users/admin/OneDrive/obsidian/专题学习/狄里克雷混合模型.md",
+        "C:/Users/admin/OneDrive/obsidian/计算机/windows终端配置.md",
+    ]
+    for fn in example_markdowns:
+        print(fn)
+        with open(fn, "r", encoding="utf-8") as f:
+            content = f.read()
 
-    ast = ObsidianMarkdownParser()(content)
-    ast.print()
-    for node in ast.filter("image_link"):
-        print(node.raw)
-        print(node.data)
-        print()
-    __import__("ipdb").set_trace()
+        ast = ObsidianMarkdownParser()(content)
+        ast.print()
+        # for node in ast.filter("image_link"):
+        #     print(node.raw)
+        #     print(node.data)
+        #     print()
+        # __import__("ipdb").set_trace()
     # markdown = mistune.Markdown()
     # res = markdown(content)
     # print_ast(res)

@@ -5,7 +5,7 @@
 ## 参考项目
 
 - [mistune](https://github.com/lepture/mistune)
-- [obsidian-html](https://github.com/obsidian-html/obsidian-html)
+- [obsidian-html](https://github.com/obsidian-html/obsidian-htmlhttps://github.com/kmaasrud/obsidian-html)
 
 ## TODO List
 
