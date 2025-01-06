@@ -2,6 +2,11 @@
 
 - [Fixit](https://fixit.lruihao.cn/zh-cn/)
 
+## 参考项目
+
+- [mistune](https://github.com/lepture/mistune)
+- [obsidian-html](https://github.com/obsidian-html/obsidian-html)
+
 ## TODO List
 
 - [x] 全新的命令行工具`ob2hugo`来实现将Obsidian markdown 转换到 Hugo markdown， 并将文件放在指定的目录下，目前仅支持Fixit主题。
