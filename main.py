@@ -1,5 +1,5 @@
 import re
-from typing import Self, Any, Union
+from typing import Iterable, Self, Any, Union
 from dataclasses import dataclass
 import mistune
 
@@ -24,9 +24,17 @@ class ASTnode:
         self.children = children or []
         self.parent = parent
         self.data = data or {}
+        self.leaf = name in ["text", "math_block"]
 
     def __repr__(self) -> str:
         return f"<ASTNode: {self.name}>"
+
+    def filte(self, name: str) -> Iterable["ASTnode"]:
+        for child in self.children:
+            if child.name == name:
+                yield child
+            else:
+                yield from child.filte(name)
 
     def print(self, indent: int = 0):
         print(
@@ -101,6 +109,43 @@ class SectionParser:
         )
 
 
+class MathBlockParser:
+    def __init__(self) -> None:
+        self.pattern = re.compile(r"^\s*\$\$(.*?)\$\$\s*\n", re.DOTALL | re.M)
+
+    def __call__(self, text: str) -> tuple[str | None, ASTnode | None, str | None]:
+        text = preprocess(text)
+        match = self.pattern.search(text)
+        if not match:
+            return None, None, text
+
+        forward = text[: match.start()] if match.start() > 0 else None
+        backward = text[match.end() :] if match.end() < len(text) else None
+        raw = match.group(1)
+
+        return (
+            forward,
+            ASTnode(
+                "math_block",
+                pattern=self.pattern,
+                raw=raw,
+            ),
+            backward,
+        )
+
+
+class ListParser:
+    def __init__(self, order: bool = False) -> None:
+        if order:
+            pass
+            # pattern = (
+            #     r'^(?P<list_1>\s*?)'
+            #     r'(?P<list_2>[\*\+-]|\d{1,9}[.)])'
+            #     r'(?P<list_3>[ \t]*|[ \t].+)$'
+            # )
+            # self.pattern =
+
+
 class ObsidianMarkdownParser:
     def __init__(self):
         self.parsers = [
@@ -108,6 +153,7 @@ class ObsidianMarkdownParser:
         ]
         for i in range(1, 6):
             self.parsers.append(SectionParser(i))
+        self.parsers.append(MathBlockParser())
 
     def __call__(self, text: str, parent: ASTnode = None, append: bool = True):
         if parent is None:
@@ -125,8 +171,9 @@ class ObsidianMarkdownParser:
                     self.__call__(forward, parent=parent, append=False)
                 if backward is not None:
                     self.__call__(backward, parent=parent, append=True)
-                self.__call__(node.raw, parent=node, append=True)
-                node.raw = None  # clear the raw text to avoid duplication
+                if not node.leaf:
+                    self.__call__(node.raw, parent=node, append=True)
+                    node.raw = None  # clear the raw text to avoid duplication
                 break
             else:
                 text = backward
@@ -165,6 +212,9 @@ def main():
 
     ast = ObsidianMarkdownParser()(content)
     ast.print()
+    for node in ast.filte("math_block"):
+        print(node.raw)
+        print()
     __import__("ipdb").set_trace()
     # markdown = mistune.Markdown()
     # res = markdown(content)
